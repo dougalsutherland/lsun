@@ -4,10 +4,11 @@
 from __future__ import print_function, division
 import argparse
 import json
+import os
 from os.path import join
 
 import subprocess
-import urllib2
+from six.moves.urllib.request import urlopen
 
 __author__ = 'Fisher Yu'
 __email__ = 'fy@cs.princeton.edu'
@@ -16,7 +17,7 @@ __license__ = 'MIT'
 
 def list_categories(tag):
     url = 'http://lsun.cs.princeton.edu/htbin/list.cgi?tag=' + tag
-    f = urllib2.urlopen(url)
+    f = urlopen(url)
     return json.loads(f.read())
 
 
@@ -28,6 +29,9 @@ def download(out_dir, category, set_name, tag):
     else:
         out_name = '{category}_{set_name}_lmdb.zip'.format(**locals())
     out_path = join(out_dir, out_name)
+    if os.path.exists(out_path) or os.path.exists(out_path[:-4]):
+        print("Already exists: {}; assuming it's complete...".format(out_path))
+        return
     cmd = ['curl', url, '-o', out_path]
     print('Downloading', category, set_name, 'set')
     subprocess.call(cmd)
